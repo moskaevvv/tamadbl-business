@@ -7,6 +7,139 @@
   <title>Дмитрий Шалаев — организатор и ведущий мероприятий</title>
   <link rel="stylesheet" href="assets/style.css?2">
   <meta charset="UTF-8">
+  <script>
+  /**
+ * Анонимная самовызывающаяся функция-обертка
+ * @param {document} d - получает документ
+ */
+!function(d) {
+
+"use strict";
+
+/**
+ * Полифилл для Object.assign()
+ */
+Object.assign||Object.defineProperty(Object,"assign",{enumerable:!1,configurable:!0,writable:!0,value:function(e,r){"use strict";if(null==e)throw new TypeError("Cannot convert first argument to object");for(var t=Object(e),n=1;n<arguments.length;n++){var o=arguments[n];if(null!=o)for(var a=Object.keys(Object(o)),c=0,b=a.length;c<b;c++){var i=a[c],l=Object.getOwnPropertyDescriptor(o,i);void 0!==l&&l.enumerable&&(t[i]=o[i])}}return t}});
+
+
+/**
+ * Главный объект
+ */
+var lazy = {};
+
+
+/**
+ * Функция проверки нахождения элемента во viewport
+ * @param {Object} el - элемент DOM
+ */
+lazy.isVisible = function(el) {
+  var coords = el.getBoundingClientRect();
+  return (coords.top >= 0 && coords.left >= 0 && coords.top) <= (window.innerHeight || d.documentElement.clientHeight);
+};
+
+/**
+ * Функция загрузки элемента
+ * @param {Event|Object} e - событие получаемое при click/hover или элемент, если используется "view"
+ * @param {Function|false} [callback] - функция, выполняемая после загрузки элемента
+ */
+lazy.get = function(e, callback) {
+  var item = e.target || e;
+  var event = e.type || false;
+  if (event) item.removeEventListener(event, lazy.get); // удаление обработчика события
+  if (!item.src) { // проверка элемента на наличие атрибута src
+    console.error("lazy-load не поддерживается для этого элемента (" + item.tagName + ")");
+    return;
+  }
+  if (!item.hasAttribute("data-js-loaded")) {
+    var src = item.getAttribute("data-js-source");
+    if (src) { // если атрибут data-source присутствует
+      item.src = src;
+      item.setAttribute("data-js-loaded", "");
+      item.removeAttribute("data-js-source");
+      item.onerror = function() { // обработка ошибок загрузки
+        console.error("загрузка источника не удалась (элемент: " + item.tagName + ", путь: " + item.src + ")");
+      };
+      setTimeout(function() { // удаление обработчика ошибок
+        item.onerror = null;
+      }, 3000);
+    } else console.error("отсутствует оригинальный источник (элемент: " + item.tagName + ", путь: " + item.src + ")");
+    if (callback) callback(item); // вызов callback, если необходимо
+  }
+};
+
+
+
+
+/**
+ * Функция инициализации lazy-load
+ * @param {Object} settings - объект с предварительными настройками
+ */
+lazy.init = function(settings) {
+
+  // настройки по умолчанию
+  settings = Object.assign({}, {
+    items:    "[data-js-source]", // селектор элементов lazy-load
+    on:       "click",         // click, view, hover
+    callback: false,           // функция, вызываемая после загрузки источника
+  }, settings);
+
+  // поиск всех lazy-элементов
+  var els = d.querySelectorAll(settings.items);
+
+
+  // обработчики событий
+  if (settings.on === "view") { // для события с условным наимнованием "view"
+    var onviewLoad = function() {
+      Array.prototype.slice.call(els, 0).forEach(function(el) {
+        if (lazy.isVisible(el)) lazy.get(el, settings.callback); // проверка на видимость во viewport, lazy.get() принимает элемент
+      });
+    };
+
+    // обработка событий для "view"
+    window.addEventListener("scroll", onviewLoad);
+    window.addEventListener("resize", onviewLoad);
+    window.addEventListener("load", onviewLoad);
+    if (screen.msOrientation || (screen.orientation || screen.mozOrientation || { type: false }).type) window.addEventListener("orientationchange", onviewLoad);
+  } else { // обработка событий "hover" и "click"
+    var eventName = (settings.on === "hover") ? "mouseover" : settings.on;
+    Array.prototype.slice.call(els, 0).forEach(function(el) {
+      el.addEventListener(eventName, function(e) {
+        lazy.get(e, settings.callback);
+      }); // lazy.get() принимает событие
+    });
+  }
+
+};
+
+window.lazy = lazy;
+
+}(document);
+
+
+
+// вызов функции
+document.addEventListener("DOMContentLoaded", function() {
+
+// lazy-load
+lazy.init({
+  on: "view", // при попадании во viewport
+  callback: function(el) { // функция при загрузке
+    el.classList.add("loading");
+    el.onload = function() {
+      el.classList.remove("loading");
+      el.onload = null;
+    }
+  }
+});
+
+// отключение кеширования оригинальных картинок
+var images = document.querySelectorAll("[data-source]");
+images.forEach(function(el) {
+  var source = el.getAttribute("data-source");
+  el.setAttribute("data-source", source + "?" + Math.random());
+})
+});
+  </script>
 </head>
 
 <body>
@@ -24,10 +157,10 @@
     <div class="content__gallery">
       <div class="content__gallery-wrapper">
         <ul class="content__gallery-images content__gallery-images--4">
-          <li class="content_gallery-img"><img src="assets/imgs/image3.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image4.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image6.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image7.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image3.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image4.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image6.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image7.jpg" alt=""></li>
         </ul>
       </div>
     </div>
@@ -44,10 +177,10 @@
     <div class="content__gallery">
       <div class="content__gallery-wrapper">
         <ul class="content__gallery-images content__gallery-images--4">
-          <li class="content_gallery-img"><img src="assets/imgs/image9.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image10.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image11.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image12.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image9.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image10.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image11.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image12.jpg" alt=""></li>
         </ul>
       </div>
     </div>
@@ -56,7 +189,7 @@
       <p class="content__paragraph">Также в&nbsp;зону ответственности ИП&nbsp;Шалаева Д.И. входила работа диджеев на&nbsp;протяжении всех дней фестиваля.</p>
 
       <figure class="content__single-picture">
-        <img src="assets/imgs/image13.jpg" alt="">
+        <img class="lazyload" src="assets/imgs/image13.jpg" alt="">
         <figcaption class="content__figcaption">Наш технический директор Николай Гарбузов играет на&nbsp;одной сцене с&nbsp;легендарным Полом Окенфолдом</figcaption>
       </figure>
 
@@ -67,12 +200,12 @@
     <div class="content__gallery">
       <div class="content__gallery-wrapper">
         <ul class="content__gallery-images content__gallery-images--6">
-          <li class="content_gallery-img"><img src="assets/imgs/image21.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image15.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image16.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image18.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image19.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image20.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image21.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image15.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image16.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image18.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image19.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image20.jpg" alt=""></li>
         </ul>
       </div>
     </div>
@@ -86,10 +219,10 @@
     <div class="content__gallery">
       <div class="content__gallery-wrapper">
         <ul class="content__gallery-images content__gallery-images--4">
-          <li class="content_gallery-img"><img src="assets/imgs/image22.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image23.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image24.jpg" alt=""></li>
-          <li class="content_gallery-img"><img src="assets/imgs/image25.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image22.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image23.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image24.jpg" alt=""></li>
+          <li class="content_gallery-img"><img class="lazyload" src="assets/imgs/image25.jpg" alt=""></li>
         </ul>
       </div>
     </div>
@@ -101,7 +234,7 @@
       <p class="content__paragraph">Хотя, разве это мелочь&nbsp;&mdash; запланировать и&nbsp;надёжно закрепить на&nbsp;льду ковровую дорожку для главы региона?!</p>
 
       <figure class="content__single-picture">
-        <img src="assets/imgs/image31.jpg" alt="">
+        <img src="https://dummyimage.com/900x555/adadad/3d3d3d&text=Placeholder+image" alt="" data-js-source="assets/imgs/image31.jpg" />
         <figcaption class="content__figcaption"><a class="content__link" href="https://www.m24.ru/videos/video/04022019/196938">Жозе Моуринью</a> точно бы оценил наш сервис и&nbsp;клиентоориентированность.</figcaption>
       </figure>
     </div>
@@ -123,6 +256,7 @@
   <footer class="page-footer">
     © ИП Шалаев Д. И., 2009—2019
   </footer>
+  <script>lazyload();</script>
 </body>
 
 </html>
