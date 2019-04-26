@@ -99,7 +99,7 @@ h3 {
 }
 
 .content {
-  width: 100vw;
+  width: 100%;
   overflow: hidden;
 }
 
@@ -128,7 +128,7 @@ h3 {
 }
 
 .content__gallery {
-  width: 100%;
+  width: 100vw;
   overflow: hidden;
   font-size: 0;
   height: calc((100vw - var(--side-padding)*2)/5*4);
@@ -136,7 +136,7 @@ h3 {
 }
 
 .content__gallery-wrapper {
-  width: 100%;
+  width: 100vw;
   overflow-x: scroll;
 }
 
@@ -274,7 +274,7 @@ img {
 @media all and (min-width: 736px) {
 
   .page-footer {
-    width: 100%;
+    width: auto;
     padding-left: var(--side-padding);
     text-align: left;
   }
@@ -423,8 +423,8 @@ img {
     display: inline-block;
     overflow: hidden;
     margin-right: 0;
-    width: 50vw;
-    height: calc(50vw/5*4 - 2px);
+    width: 50%;
+    height: calc(50%/5*4 - 2px);
     border-radius: 0;
   }
 
