@@ -422,7 +422,7 @@ img {
     overflow: hidden;
     margin-right: 0;
     width: 50%;
-    height: calc(50%/5*4 - 2px);
+    height: calc(50vw / 5 * 4 - 4px);
     border-radius: 0;
   }
 
