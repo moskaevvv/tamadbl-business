@@ -13,6 +13,7 @@
   <div class="hero">
     <div class="hero__picture"></div>
     <h1 class="hero__heading">Дмитрий Шалаев <br><span class="accent__red">event-ниндзя</span></h1>
+    <a href="#contacts" class="hero-btn">Показать контакты</a>
   </div>
 
   <main class="content">
@@ -150,7 +151,7 @@
       </div>
     </div>
 
-    <div class="contacts">
+    <div class="contacts" id="contacts">
       <a href="tel:+7-927-276-73-06" class="content__link content__link--contact">Позвонить на <span class="contact-big">+7 927 276-73-06</span></a>
       <a href="mailto:dima@tamadbl.net" class="content__link content__link--contact">Написать на <span class="contact-big">dima@tamadbl.net</span></a>
     </div>
@@ -159,5 +160,21 @@
     © ИП Шалаев Д. И., 2009—2019
   </footer>
 </body>
+<script>
+  const anchors = document.querySelectorAll('a[href*="#"]')
+
+  for (let anchor of anchors) {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault()
+
+      const blockID = anchor.getAttribute('href')
+
+      document.querySelector('' + blockID).scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      })
+    })
+  }
+</script>
 
 </html>
