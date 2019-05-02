@@ -63,8 +63,11 @@ h3 {
   height: 150px;
   overflow: hidden;
   border-radius: 50%;
-  background: transparent url('imgs/face.jpg');
   background-size: 100%;
+}
+
+.hero__picture img {
+  width: 100%;
 }
 
 .hero-btn {
@@ -75,14 +78,19 @@ h3 {
   margin-top: 2rem;
   font-weight: 600;
   color: black;
+  -webkit-box-shadow: 0 24px 48px -8px rgba(255, 2, 102, 0.32);
   box-shadow: 0 24px 48px -8px rgba(255, 2, 102, 0.32);
+  -webkit-transition: 0.24s ease-in;
   transition: 0.24s ease-in;
   z-index: inherit;
 }
 
 .hero-btn:hover {
+  -webkit-transform: translateY(4px);
   transform: translateY(4px);
+  -webkit-box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+  -webkit-transition: 0.24s ease-out;
   transition: 0.24s ease-out;
   background-color: var(--highlight-yellow);
 }
